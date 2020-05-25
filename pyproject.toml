@@ -9,6 +9,7 @@ python = "3.8.2"
 requests = "^2.23.0"
 backoff = "^1.10.0"
 prompt_toolkit = "^3.0.5"
+tqdm = "^4.46.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"

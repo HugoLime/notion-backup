@@ -1,6 +1,7 @@
 __pycache__/
 .pyc
 *.egg-info/
+/export*
 
 /.idea
 /.venv/
