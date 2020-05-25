@@ -1,3 +1,5 @@
+from operator import itemgetter
+
 from prompt_toolkit import prompt
 
 from notion_backup.configuration_service import ConfigurationService
@@ -31,7 +33,29 @@ class BackupService:
         if not token:
             self.login()
 
+        user_content = self.notion_client.get_user_content()
+
+        user_id = list(user_content["notion_user"].keys())[0]
+        print(f"User id: {user_id}")
+
+        spaces = [
+            (space_id, space_details["value"]["name"])
+            for (space_id, space_details) in user_content["space"].items()
+        ]
+        print("Available spaces:")
+        for (space_id, space_name) in spaces:
+            print(f'\t- {space_name}: {space_id}')
+        space_id = self.configuration_service.get_key('space_id')
+        space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
+
+        if space_id not in map(itemgetter(0), spaces):
+            raise Exception('Selected space id not in list')
+
+        self.configuration_service.write_key('space_id', space_id)
         print("Launching export task")
+
+
+
         print("Waiting for export task to complete")
         print("Downloading zip export")
 

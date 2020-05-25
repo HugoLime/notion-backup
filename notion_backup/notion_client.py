@@ -33,3 +33,19 @@ class NotionClient:
         )
         response.raise_for_status()
         return response.cookies["token_v2"]
+
+    def _send_post_request(self, path, body):
+        response = requests.request(
+            "POST",
+            f"{NOTION_API_ROOT}/{path}",
+            json=body,
+            cookies={
+                'token_v2': self.configuration_service.get_key('token')
+            },
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_user_content(self):
+        return self._send_post_request('loadUserContent', {})["recordMap"]
+
