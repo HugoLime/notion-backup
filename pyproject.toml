@@ -8,6 +8,7 @@ authors = ["Hugo Lime <ligohu@outlook.fr>"]
 python = "3.8.2"
 requests = "^2.23.0"
 backoff = "^1.10.0"
+prompt_toolkit = "^3.0.5"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
