@@ -1,8 +1,10 @@
 [tool.poetry]
 name = "notion-backup"
 version = "0.1.0"
-description = ""
+description = "Notion workspace export automation tool"
 authors = ["Ligohu <ligohu@outlook.fr>"]
+readme = "README.md"
+repository = "https://github.com/HugoLime/notion-backup"
 
 [tool.poetry.dependencies]
 python = "3.8.2"
@@ -13,6 +15,10 @@ tqdm = "^4.46.0"
 
 [tool.poetry.dev-dependencies]
 black = "^19.10b0"
+
+[tool.poetry.scripts]
+backup_notion = 'notion_backup.backup_service:main'
+
 
 [build-system]
 requires = ["poetry>=0.12"]

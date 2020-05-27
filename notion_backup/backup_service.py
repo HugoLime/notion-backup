@@ -94,7 +94,7 @@ class BackupService:
         self._download_file(export_link, Path(export_file_name))
 
 
-if __name__ == "__main__":
+def main():
     print("Backup Notion workspace")
     backup_service = BackupService()
     backup_service.backup()

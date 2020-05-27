@@ -23,7 +23,7 @@ update: ## Update dependencies
 	@poetry update
 
 backup: ## Run backup
-	@poetry run python notion_backup/backup_service.py
+	@poetry run backup_notion
 
 build: ## Build package
 	@poetry build
