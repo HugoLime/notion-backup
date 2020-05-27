@@ -14,6 +14,7 @@ from notion_backup.notion_client import NotionClient
 STATUS_WAIT_TIME = 5
 block_size = 1024  # 1 Kibibyte
 
+
 class BackupService:
     def __init__(self):
         self.configuration_service = ConfigurationService()
@@ -37,8 +38,8 @@ class BackupService:
 
     def _download_file(self, url, export_file):
         with requests.get(url, stream=True, allow_redirects=True) as response:
-            total_size = int(response.headers.get('content-length', 0))
-            tqdm_bar = tqdm(total=total_size, unit='iB', unit_scale=True)
+            total_size = int(response.headers.get("content-length", 0))
+            tqdm_bar = tqdm(total=total_size, unit="iB", unit_scale=True)
             with export_file.open("wb") as export_file_handle:
                 for data in response.iter_content(block_size):
                     tqdm_bar.update(len(data))
@@ -83,7 +84,7 @@ class BackupService:
                 f"...Export still in progress, waiting for {STATUS_WAIT_TIME} seconds"
             )
             sleep(STATUS_WAIT_TIME)
-        print('Export task is finished')
+        print("Export task is finished")
 
         export_link = task_status["status"]["exportURL"]
         print(f"Downloading zip export from {export_link}")

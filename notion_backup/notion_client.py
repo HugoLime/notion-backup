@@ -73,4 +73,6 @@ class NotionClient:
             "results"
         ]
 
-        return list(filter(lambda task_status: task_status["id"] == task_id, task_statuses))[0]
+        return list(
+            filter(lambda task_status: task_status["id"] == task_id, task_statuses)
+        )[0]
