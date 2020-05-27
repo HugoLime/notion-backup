@@ -25,5 +25,11 @@ update: ## Update dependencies
 backup: ## Run backup
 	@poetry run python notion_backup/backup_service.py
 
+build: ## Build package
+	@poetry build
+
+publish: ## Publish package
+	@poetry publish --build
+
 format: ## Format
 	@black .

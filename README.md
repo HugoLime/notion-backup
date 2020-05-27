@@ -1,2 +1,16 @@
 # notion-backup
-Automate Notion workspace backup export
+Automate export of Notion workspace
+
+
+## Installation
+
+```
+pip install notion-backup
+```
+
+
+## Usage
+
+```
+
+```

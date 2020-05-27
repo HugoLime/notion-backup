@@ -2,7 +2,7 @@
 name = "notion-backup"
 version = "0.1.0"
 description = ""
-authors = ["Hugo Lime <ligohu@outlook.fr>"]
+authors = ["Ligohu <ligohu@outlook.fr>"]
 
 [tool.poetry.dependencies]
 python = "3.8.2"
