@@ -1,9 +1,9 @@
-import shutil
 from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
 from time import sleep
 
+import click
 import requests
 from prompt_toolkit import prompt
 from tqdm import tqdm
@@ -16,7 +16,10 @@ block_size = 1024  # 1 Kibibyte
 
 
 class BackupService:
-    def __init__(self):
+    def __init__(self, output_dir_path):
+        self.output_dir_path = output_dir_path
+        if not self.output_dir_path.exists():
+            raise Exception(f'Output directory {self.output_dir_path.resolve()} does not exit')
         self.configuration_service = ConfigurationService()
         self.notion_client = NotionClient(self.configuration_service)
 
@@ -91,10 +94,13 @@ class BackupService:
 
         export_file_name = f'export_{space_id}_{datetime.now().strftime("%Y%m%d")}.zip'
 
-        self._download_file(export_link, Path(export_file_name))
+        self._download_file(export_link, self.output_dir_path / export_file_name)
 
 
-def main():
-    print("Backup Notion workspace")
-    backup_service = BackupService()
+@click.command()
+@click.option("--output-dir", default=".", help="Where the zip export will be saved")
+def main(output_dir):
+    output_dir_path = Path(output_dir)
+    print(f"Backup Notion workspace into directory {output_dir_path.resolve()}")
+    backup_service = BackupService(output_dir_path)
     backup_service.backup()
