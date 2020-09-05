@@ -104,3 +104,7 @@ def main(output_dir):
     print(f"Backup Notion workspace into directory {output_dir_path.resolve()}")
     backup_service = BackupService(output_dir_path)
     backup_service.backup()
+
+
+if __name__ == '__main__':
+    main()
