@@ -2,6 +2,7 @@ from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
 from time import sleep
+import os
 
 import click
 import requests
@@ -67,8 +68,12 @@ class BackupService:
         print("Available spaces:")
         for (space_id, space_name) in spaces:
             print(f"\t- {space_name}: {space_id}")
-        space_id = self.configuration_service.get_key("space_id")
-        space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
+        if 'SPACE_ID' in os.environ:
+            space_id = os.environ.get('SPACE_ID')
+        else:
+            space_id = self.configuration_service.get_key("space_id")
+        if space_id and os.environ.get('RUN_MODE', False) != 'noninteractive':
+            space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
 
         if space_id not in map(itemgetter(0), spaces):
             raise Exception("Selected space id not in list")
@@ -81,12 +86,18 @@ class BackupService:
 
         while True:
             task_status = self.notion_client.get_user_task_status(task_id)
-            if task_status["status"]["type"] == "complete":
-                break
-            print(
-                f"...Export still in progress, waiting for {STATUS_WAIT_TIME} seconds"
-            )
-            sleep(STATUS_WAIT_TIME)
+            try:
+                if task_status["status"]["type"] == "complete":
+                    break
+                current_status = task_status["status"]["type"]
+                print(
+                    f"...Export still in status '{current_status}', waiting for {STATUS_WAIT_TIME} seconds"
+                )
+                sleep(STATUS_WAIT_TIME)
+            except KeyError:
+                print(
+                    f"...Export status not available, waiting for {STATUS_WAIT_TIME} seconds"
+                )
         print("Export task is finished")
 
         export_link = task_status["status"]["exportURL"]
@@ -100,6 +111,7 @@ class BackupService:
 @click.command()
 @click.option("--output-dir", default=".", help="Where the zip export will be saved")
 def main(output_dir):
+    output_dir = os.environ.get('OUTPUT_DIR', output_dir)
     output_dir_path = Path(output_dir)
     print(f"Backup Notion workspace into directory {output_dir_path.resolve()}")
     backup_service = BackupService(output_dir_path)
