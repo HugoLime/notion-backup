@@ -12,7 +12,7 @@ from tqdm import tqdm
 from notion_backup.configuration_service import ConfigurationService
 from notion_backup.notion_client import NotionClient
 
-STATUS_WAIT_TIME = 5
+STATUS_WAIT_TIME = 30
 block_size = 1024  # 1 Kibibyte
 
 
@@ -85,8 +85,8 @@ class BackupService:
         print(f"Export task {task_id} has been launched")
 
         while True:
-            task_status = self.notion_client.get_user_task_status(task_id)
             try:
+                task_status = self.notion_client.get_user_task_status(task_id)
                 if task_status["status"]["type"] == "complete":
                     break
                 current_status = task_status["status"]["type"]
@@ -94,10 +94,17 @@ class BackupService:
                     f"...Export still in status '{current_status}', waiting for {STATUS_WAIT_TIME} seconds"
                 )
                 sleep(STATUS_WAIT_TIME)
-            except KeyError:
+            except KeyError as error:
+                print(type(error), error)
                 print(
                     f"...Export status not available, waiting for {STATUS_WAIT_TIME} seconds"
                 )
+            except requests.exceptions.HTTPError as error:
+                print(type(error), error)
+                print(
+                    f"...Export status HTTPError, waiting for {STATUS_WAIT_TIME} seconds"
+                )
+
         print("Export task is finished")
 
         export_link = task_status["status"]["exportURL"]
