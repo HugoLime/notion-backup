@@ -100,10 +100,15 @@ class BackupService:
                     f"...Export status not available, waiting for {STATUS_WAIT_TIME} seconds"
                 )
             except requests.exceptions.HTTPError as error:
-                print(type(error), error)
-                print(
-                    f"...Export status HTTPError, waiting for {STATUS_WAIT_TIME} seconds"
-                )
+                # catch temporary errors
+                if error.response.status_code in [502, 504]:
+                    print(type(error), error)
+                    print(
+                        f"...Export status HTTPError, waiting for {STATUS_WAIT_TIME} seconds"
+                    )
+                else:
+                    error.request.raise_for_status()
+
 
         print("Export task is finished")
 
