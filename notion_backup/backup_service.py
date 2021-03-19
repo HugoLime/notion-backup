@@ -2,6 +2,7 @@ from datetime import datetime
 from operator import itemgetter
 from pathlib import Path
 from time import sleep
+import os
 
 import click
 import requests
@@ -11,7 +12,7 @@ from tqdm import tqdm
 from notion_backup.configuration_service import ConfigurationService
 from notion_backup.notion_client import NotionClient
 
-STATUS_WAIT_TIME = 5
+STATUS_WAIT_TIME = 30
 block_size = 1024  # 1 Kibibyte
 
 
@@ -67,8 +68,12 @@ class BackupService:
         print("Available spaces:")
         for (space_id, space_name) in spaces:
             print(f"\t- {space_name}: {space_id}")
-        space_id = self.configuration_service.get_key("space_id")
-        space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
+        if 'SPACE_ID' in os.environ:
+            space_id = os.environ.get('SPACE_ID')
+        else:
+            space_id = self.configuration_service.get_key("space_id")
+        if space_id and os.environ.get('RUN_MODE', False) != 'noninteractive':
+            space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
 
         if space_id not in map(itemgetter(0), spaces):
             raise Exception("Selected space id not in list")
@@ -80,13 +85,31 @@ class BackupService:
         print(f"Export task {task_id} has been launched")
 
         while True:
-            task_status = self.notion_client.get_user_task_status(task_id)
-            if task_status["status"]["type"] == "complete":
-                break
-            print(
-                f"...Export still in progress, waiting for {STATUS_WAIT_TIME} seconds"
-            )
-            sleep(STATUS_WAIT_TIME)
+            try:
+                task_status = self.notion_client.get_user_task_status(task_id)
+                if task_status["status"]["type"] == "complete":
+                    break
+                current_status = task_status["status"]["type"]
+                print(
+                    f"...Export still in status '{current_status}', waiting for {STATUS_WAIT_TIME} seconds"
+                )
+                sleep(STATUS_WAIT_TIME)
+            except KeyError as error:
+                print(type(error), error)
+                print(
+                    f"...Export status not available, waiting for {STATUS_WAIT_TIME} seconds"
+                )
+            except requests.exceptions.HTTPError as error:
+                # catch temporary errors
+                if error.response.status_code in [502, 504]:
+                    print(type(error), error)
+                    print(
+                        f"...Export status HTTPError, waiting for {STATUS_WAIT_TIME} seconds"
+                    )
+                else:
+                    error.request.raise_for_status()
+
+
         print("Export task is finished")
 
         export_link = task_status["status"]["exportURL"]
@@ -100,6 +123,7 @@ class BackupService:
 @click.command()
 @click.option("--output-dir", default=".", help="Where the zip export will be saved")
 def main(output_dir):
+    output_dir = os.environ.get('OUTPUT_DIR', output_dir)
     output_dir_path = Path(output_dir)
     print(f"Backup Notion workspace into directory {output_dir_path.resolve()}")
     backup_service = BackupService(output_dir_path)

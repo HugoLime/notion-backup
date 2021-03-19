@@ -1,0 +1,18 @@
+# compose file to build and run notion_backup
+# execute with
+# docker-compose build
+# docker-compose run notion_backup
+
+version: '3'
+
+services:
+  notion_backup:
+    build: .
+    # user: '1000'
+    environment:
+      OUTPUT_DIR: /exports
+      CONFIG_FILE: /config/notion_backup.conf
+      RUN_MODE: noninteractive # only ask on first run
+    volumes:
+      - ./config:/config
+      - ./exports:/exports
