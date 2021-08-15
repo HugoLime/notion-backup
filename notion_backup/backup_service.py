@@ -78,6 +78,7 @@ class BackupService:
 
         if self.space_id:
             print(f"Selecting space {self.space_id}")
+            space_id=self.space_id
         else:
             space_id = self.configuration_service.get_key("space_id")
             space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
