@@ -16,8 +16,9 @@ block_size = 1024  # 1 Kibibyte
 
 
 class BackupService:
-    def __init__(self, output_dir_path):
+    def __init__(self, output_dir_path, space_id):
         self.output_dir_path = output_dir_path
+        self.space_id = space_id
         if not self.output_dir_path.exists():
             raise Exception(f'Output directory {self.output_dir_path.resolve()} does not exit')
         self.configuration_service = ConfigurationService()
@@ -74,8 +75,12 @@ class BackupService:
         print("Available spaces:")
         for (space_id, space_name) in spaces:
             print(f"\t- {space_name}: {space_id}")
-        space_id = self.configuration_service.get_key("space_id")
-        space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
+
+        if self.space_id:
+            print(f"Selecting space {self.space_id}")
+        else:
+            space_id = self.configuration_service.get_key("space_id")
+            space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
 
         if space_id not in map(itemgetter(0), spaces):
             raise Exception("Selected space id not in list")
@@ -106,10 +111,11 @@ class BackupService:
 
 @click.command()
 @click.option("--output-dir", default=".", help="Where the zip export will be saved")
-def main(output_dir):
+@click.option("--space-id", help="Id of Notion workspace")
+def main(output_dir, space_id):
     output_dir_path = Path(output_dir)
     print(f"Backup Notion workspace into directory {output_dir_path.resolve()}")
-    backup_service = BackupService(output_dir_path)
+    backup_service = BackupService(output_dir_path, space_id)
     backup_service.backup()
 
 
