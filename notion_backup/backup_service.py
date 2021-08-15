@@ -51,10 +51,17 @@ class BackupService:
             tqdm_bar.close()
 
     def backup(self):
-        print("Login to notion if necessary")
         token = self.configuration_service.get_key("token")
         if not token:
+            print("First time login")
             self._login()
+
+        try:
+            self.notion_client.get_user_content()
+        except requests.exceptions.HTTPError as err:
+            if err.response.status_code==401:
+                print("Credentials have expired, login again")
+                self._login()
 
         user_content = self.notion_client.get_user_content()
 
