@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "notion-backup"
-version = "0.2.0"
+version = "0.2.1"
 description = "Notion workspace export automation tool"
 authors = ["Ligohu <ligohu@outlook.fr>"]
 readme = "README.md"
 repository = "https://github.com/HugoLime/notion-backup"
 
 [tool.poetry.dependencies]
-python = ">=3.8.2"
+python = ">=3.8.5"
 requests = ">=2.23.0"
 backoff = ">=1.10.0"
 prompt_toolkit = ">=3.0.5"
