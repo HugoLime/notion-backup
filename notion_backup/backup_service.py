@@ -87,15 +87,27 @@ class BackupService:
         while True:
             try:
                 task_status = self.notion_client.get_user_task_status(task_id)
+                current_state = task_status["state"]
+                if current_state == "failure":
+                    print(
+                        f"...Export ERROR '{current_state}'"
+                    )
+                    self.status_print(task_id)
+                    exit(1)
+                    break
+
+                if current_state == "in_progress":
+                    print(
+                        f"...Export still in status '{current_state}', waiting for {STATUS_WAIT_TIME} seconds"
+                    )
+                    print(task_status["status"])
+                    sleep(STATUS_WAIT_TIME)
+                    continue
                 if task_status["status"]["type"] == "complete":
                     break
-                current_status = task_status["status"]["type"]
-                print(
-                    f"...Export still in status '{current_status}', waiting for {STATUS_WAIT_TIME} seconds"
-                )
-                sleep(STATUS_WAIT_TIME)
             except KeyError as error:
                 print(type(error), error)
+                self.status_print(task_id)
                 print(
                     f"...Export status not available, waiting for {STATUS_WAIT_TIME} seconds"
                 )
@@ -109,8 +121,10 @@ class BackupService:
                 else:
                     error.request.raise_for_status()
 
-
         print("Export task is finished")
+        current_state=task_status["state"]
+        self.status_print(task_id)
+        print(f"Task state: {current_state}")
 
         export_link = task_status["status"]["exportURL"]
         print(f"Downloading zip export from {export_link}")
@@ -119,6 +133,11 @@ class BackupService:
 
         self._download_file(export_link, self.output_dir_path / export_file_name)
 
+    def status_print(self, task_id):
+        print(f"Status of task id {task_id}:")
+        print(self.notion_client.get_user_task_status(task_id))
+    def status(task_id):
+        self.status_print(task_id)
 
 @click.command()
 @click.option("--output-dir", default=".", help="Where the zip export will be saved")
@@ -128,6 +147,7 @@ def main(output_dir):
     print(f"Backup Notion workspace into directory {output_dir_path.resolve()}")
     backup_service = BackupService(output_dir_path)
     backup_service.backup()
+    # backup_service.status_print("de9e9934-887d-4ffb-ba62-1928e7589487")
 
 
 if __name__ == '__main__':

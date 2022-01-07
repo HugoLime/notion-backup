@@ -13,6 +13,8 @@ services:
       OUTPUT_DIR: /exports
       CONFIG_FILE: /config/notion_backup.conf
       RUN_MODE: noninteractive # only ask on first run
+      # SPACE_ID: 1234asdf-asdf-asdf-asdf-3412asdfasdf
     volumes:
       - ./config:/config
       - ./exports:/exports
+      # - ./:/code # debug
