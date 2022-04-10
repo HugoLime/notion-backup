@@ -94,7 +94,7 @@ class BackupService:
 
         while True:
             task_status = self.notion_client.get_user_task_status(task_id)
-            if task_status["status"]["type"] == "complete":
+            if 'status' in task_status and task_status["status"]["type"] == "complete":
                 break
             print(
                 f"...Export still in progress, waiting for {STATUS_WAIT_TIME} seconds"
