@@ -37,3 +37,4 @@ class ConfigurationService:
     def _save_config(self):
         with self.conf_file.open("w") as conf_file_handle:
             json.dump(self.config, conf_file_handle, indent=4, sort_keys=True)
+            conf_file_handle.write("\n")  # Add trailing newline
