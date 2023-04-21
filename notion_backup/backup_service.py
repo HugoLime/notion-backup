@@ -20,7 +20,7 @@ class BackupService:
         self.output_dir_path = output_dir_path
         self.space_id = space_id
         if not self.output_dir_path.exists():
-            raise Exception(f'Output directory {self.output_dir_path.resolve()} does not exit')
+            raise Exception(f"Output directory {self.output_dir_path.resolve()} does not exit")
         self.configuration_service = ConfigurationService()
         self.notion_client = NotionClient(self.configuration_service)
 
@@ -40,9 +40,11 @@ class BackupService:
         self.configuration_service.write_key("token", token)
         print("Congratulations, you have been successfully authenticated")
 
-    def _download_file(self, url, export_file):
-        with requests.get(url, stream=True, allow_redirects=True) as response:
-            total_size = int(response.headers.get("content-length", 0))
+    def _download_file(self, url, export_file, file_token):
+        with requests.get(
+            url, stream=True, allow_redirects=True, cookies={"file_token": file_token}
+        ) as response:
+            total_size = int(response.headers.get("Content-Length", 0))
             tqdm_bar = tqdm(total=total_size, unit="iB", unit_scale=True)
             with export_file.open("wb") as export_file_handle:
                 for data in response.iter_content(block_size):
@@ -59,7 +61,7 @@ class BackupService:
         try:
             self.notion_client.get_user_content()
         except requests.exceptions.HTTPError as err:
-            if err.response.status_code==401:
+            if err.response.status_code == 401:
                 print("Credentials have expired, login again")
                 self._login()
 
@@ -73,12 +75,12 @@ class BackupService:
             for (space_id, space_details) in user_content["space"].items()
         ]
         print("Available spaces:")
-        for (space_id, space_name) in spaces:
+        for space_id, space_name in spaces:
             print(f"\t- {space_name}: {space_id}")
 
         if self.space_id:
             print(f"Selecting space {self.space_id}")
-            space_id=self.space_id
+            space_id = self.space_id
         else:
             space_id = self.configuration_service.get_key("space_id")
             space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
@@ -94,11 +96,9 @@ class BackupService:
 
         while True:
             task_status = self.notion_client.get_user_task_status(task_id)
-            if 'status' in task_status and task_status["status"]["type"] == "complete":
+            if "status" in task_status and task_status["status"]["type"] == "complete":
                 break
-            print(
-                f"...Export still in progress, waiting for {STATUS_WAIT_TIME} seconds"
-            )
+            print(f"...Export still in progress, waiting for {STATUS_WAIT_TIME} seconds")
             sleep(STATUS_WAIT_TIME)
         print("Export task is finished")
 
@@ -107,7 +107,8 @@ class BackupService:
 
         export_file_name = f'export_{space_id}_{datetime.now().strftime("%Y%m%d")}.zip'
 
-        self._download_file(export_link, self.output_dir_path / export_file_name)
+        file_token = self.notion_client.get_file_token()
+        self._download_file(export_link, self.output_dir_path / export_file_name, file_token)
 
 
 @click.command()
@@ -120,5 +121,5 @@ def main(output_dir, space_id):
     backup_service.backup()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

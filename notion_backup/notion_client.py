@@ -37,6 +37,15 @@ class NotionClient:
         response.raise_for_status()
         return response.cookies["token_v2"]
 
+    def get_file_token(self):
+        response = requests.request(
+            "GET",
+            f"https://www.notion.so/f/refresh",
+            cookies={"token_v2": self.configuration_service.get_key("token")},
+        )
+        response.raise_for_status()
+        return response.cookies["file_token"]
+
     def _send_post_request(self, path, body):
         response = requests.request(
             "POST",
@@ -69,10 +78,6 @@ class NotionClient:
         )["taskId"]
 
     def get_user_task_status(self, task_id):
-        task_statuses = self._send_post_request("getTasks", {"taskIds": [task_id]})[
-            "results"
-        ]
+        task_statuses = self._send_post_request("getTasks", {"taskIds": [task_id]})["results"]
 
-        return list(
-            filter(lambda task_status: task_status["id"] == task_id, task_statuses)
-        )[0]
+        return list(filter(lambda task_status: task_status["id"] == task_id, task_statuses))[0]
