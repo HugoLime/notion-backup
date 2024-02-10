@@ -6,7 +6,7 @@ NOTION_API_ROOT = "https://www.notion.so/api/v3"
 
 
 class NotionClient:
-    def __init__(self, configuration_service: ConfigurationService):
+    def __init__(self, configuration_service: ConfigurationService = ConfigurationService()):
         self.configuration_service = configuration_service
 
     def ask_otp(self):
