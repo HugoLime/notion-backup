@@ -71,6 +71,34 @@ class NotionClient:
             },
         )["taskId"]
 
+    def launch_block_export_task(
+        self, space_id, block_id, recursive=False, export_comments=False, export_type="html",
+        include_contents="no_files",
+    ):
+        return self._send_post_request(
+            "enqueueTask",
+            {
+                "task": {
+                    "eventName": "exportBlock",
+                    "request": {
+                        "block": {
+                            "id": block_id,
+                            "spaceId": space_id
+                        },
+                        "exportOptions": {
+                            "collectionViewExportType": "currentView",
+                            "exportType": export_type,
+                            "includeContents": include_contents,
+                            "locale": "en",
+                            "timeZone": "Asia/Jerusalem"
+                        },
+                        "recursive": recursive,
+                        "shouldExportComments": export_comments,
+                    },
+                }
+            },
+        )["taskId"]
+
     def get_user_task_status(self, task_id):
         task_statuses = self._send_post_request("getTasks", {"taskIds": [task_id]})[
             "results"
