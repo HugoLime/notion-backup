@@ -93,7 +93,7 @@ class BackupService:
         self.configuration_service.write_key("space_id", space_id)
 
         print("Launching export task")
-        task_id = self.notion_client.launch_export_task(space_id)
+        task_id = self.notion_client.launch_space_export_task(space_id)
         print(f"Export task {task_id} has been launched")
 
         while True:
