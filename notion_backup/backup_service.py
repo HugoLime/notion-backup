@@ -19,12 +19,12 @@ block_size = 1024  # 1 Kibibyte
 
 
 class BackupService:
-    def __init__(self, output_dir: Path, space_id: str = None):
+    def __init__(self, output_dir: Path, config_dir: Path = Path.home(), space_id: str = None):
         self.output_dir_path = output_dir
         self.space_id = space_id
         if not self.output_dir_path.exists():
             raise ValueError(f"Output directory {self.output_dir_path.resolve()} does not exit")
-        self.configuration_service = ConfigurationService()
+        self.configuration_service = ConfigurationService(config_dir)
         self.notion_client = NotionClient(self.configuration_service)
 
     def _login(self):
