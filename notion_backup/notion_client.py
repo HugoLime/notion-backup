@@ -6,7 +6,7 @@ NOTION_API_ROOT = "https://www.notion.so/api/v3"
 
 
 class NotionClient:
-    def __init__(self, configuration_service: ConfigurationService):
+    def __init__(self, configuration_service: ConfigurationService = ConfigurationService()):
         self.configuration_service = configuration_service
 
     def ask_otp(self):
@@ -59,7 +59,7 @@ class NotionClient:
     def get_user_content(self):
         return self._send_post_request("loadUserContent", {})["recordMap"]
 
-    def launch_export_task(self, space_id):
+    def launch_space_export_task(self, space_id):
         return self._send_post_request(
             "enqueueTask",
             {
@@ -72,6 +72,34 @@ class NotionClient:
                             "timeZone": "Europe/Paris",
                             "locale": "en",
                         },
+                    },
+                }
+            },
+        )["taskId"]
+
+    def launch_block_export_task(
+        self, space_id, block_id, recursive=False, export_comments=False, export_type="html",
+        include_contents="no_files",
+    ):
+        return self._send_post_request(
+            "enqueueTask",
+            {
+                "task": {
+                    "eventName": "exportBlock",
+                    "request": {
+                        "block": {
+                            "id": block_id,
+                            "spaceId": space_id
+                        },
+                        "exportOptions": {
+                            "collectionViewExportType": "currentView",
+                            "exportType": export_type,
+                            "includeContents": include_contents,
+                            "locale": "en",
+                            "timeZone": "Asia/Jerusalem"
+                        },
+                        "recursive": recursive,
+                        "shouldExportComments": export_comments,
                     },
                 }
             },
