@@ -42,10 +42,8 @@ class BackupService:
         self.configuration_service.write_key("token", token)
         print("Congratulations, you have been successfully authenticated")
 
-    def _download_file(self, url, export_file, file_token):
-        with requests.get(
-            url, stream=True, allow_redirects=True, cookies={"file_token": file_token}
-        ) as response:
+    def _download_file(self, url, export_file):
+        with requests.get(url, stream=True, allow_redirects=True) as response:
             total_size = int(response.headers.get("Content-Length", 0))
             tqdm_bar = tqdm(total=total_size, unit="iB", unit_scale=True)
             with export_file.open("wb") as export_file_handle:
@@ -111,10 +109,7 @@ class BackupService:
 
         export_file_name = f'export_{space_id}_{datetime.now().strftime("%Y%m%d")}.zip'
 
-        file_token = self.notion_client.get_file_token()
-        self._download_file(
-            export_link, self.output_dir_path / export_file_name, file_token
-        )
+        self._download_file(export_link, self.output_dir_path / export_file_name)
 
 
 @click.command()
