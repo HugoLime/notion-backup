@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "notion-backup"
-version = "0.3.5"
+version = "0.3.6"
 description = "Notion workspace export automation tool"
 authors = ["Ligohu <ligohu@outlook.fr>"]
 readme = "README.md"
