@@ -14,7 +14,7 @@ class NotionClient:
             "POST",
             f"{NOTION_API_ROOT}/sendTemporaryPassword",
             json={
-                "email": self.configuration_service.get_key("email"),
+                "email": self.configuration_service._get_string_key("email"),
                 "disableLoginLink": False,
                 "native": False,
                 "isSignup": False,
@@ -38,20 +38,26 @@ class NotionClient:
         return response.cookies["token_v2"]
 
     def get_file_token(self):
+        token = self.configuration_service._get_string_key("token")
+        if not token:
+            raise Exception("Token is not set")
         response = requests.request(
             "GET",
             f"https://www.notion.so/f/refresh",
-            cookies={"token_v2": self.configuration_service.get_key("token")},
+            cookies={"token_v2": token},
         )
         response.raise_for_status()
         return response.cookies["file_token"]
 
     def _send_post_request(self, path, body):
+        token = self.configuration_service._get_string_key("token")
+        if not token:
+            raise Exception("Token is not set")
         response = requests.request(
             "POST",
             f"{NOTION_API_ROOT}/{path}",
             json=body,
-            cookies={"token_v2": self.configuration_service.get_key("token")},
+            cookies={"token_v2": token},
         )
         response.raise_for_status()
         return response.json()
@@ -78,6 +84,10 @@ class NotionClient:
         )["taskId"]
 
     def get_user_task_status(self, task_id):
-        task_statuses = self._send_post_request("getTasks", {"taskIds": [task_id]})["results"]
+        task_statuses = self._send_post_request("getTasks", {"taskIds": [task_id]})[
+            "results"
+        ]
 
-        return list(filter(lambda task_status: task_status["id"] == task_id, task_statuses))[0]
+        return list(
+            filter(lambda task_status: task_status["id"] == task_id, task_statuses)
+        )[0]

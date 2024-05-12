@@ -1,6 +1,7 @@
 import json
 from json import JSONDecodeError
 from pathlib import Path
+from typing import Optional
 
 CONFIGURATION_FILE_NAME = ".notion_backup.conf"
 DEFAULT_CONFIG = {"version": 1}
@@ -11,8 +12,14 @@ class ConfigurationService:
         self.conf_file = Path.home() / CONFIGURATION_FILE_NAME
         self._read_config()
 
-    def get_key(self, key):
+    def _get_key(self, key):
         return self.config.get(key)
+
+    def _get_string_key(self, key) -> Optional[str]:
+        value = self._get_key(key)
+        if not isinstance(value, str):
+            return None
+        return value
 
     def write_key(self, key, value):
         self.config[key] = value

@@ -20,12 +20,14 @@ class BackupService:
         self.output_dir_path = output_dir_path
         self.space_id = space_id
         if not self.output_dir_path.exists():
-            raise Exception(f"Output directory {self.output_dir_path.resolve()} does not exit")
+            raise Exception(
+                f"Output directory {self.output_dir_path.resolve()} does not exit"
+            )
         self.configuration_service = ConfigurationService()
         self.notion_client = NotionClient(self.configuration_service)
 
     def _login(self):
-        email = self.configuration_service.get_key("email")
+        email = self.configuration_service._get_string_key("email")
         if email:
             email = prompt("Email address: ", default=email)
         else:
@@ -53,7 +55,7 @@ class BackupService:
             tqdm_bar.close()
 
     def backup(self):
-        token = self.configuration_service.get_key("token")
+        token = self.configuration_service._get_string_key("token")
         if not token:
             print("First time login")
             self._login()
@@ -82,7 +84,7 @@ class BackupService:
             print(f"Selecting space {self.space_id}")
             space_id = self.space_id
         else:
-            space_id = self.configuration_service.get_key("space_id")
+            space_id = self.configuration_service._get_string_key("space_id")
             space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
 
         if space_id not in map(itemgetter(0), spaces):
@@ -98,7 +100,9 @@ class BackupService:
             task_status = self.notion_client.get_user_task_status(task_id)
             if "status" in task_status and task_status["status"]["type"] == "complete":
                 break
-            print(f"...Export still in progress, waiting for {STATUS_WAIT_TIME} seconds")
+            print(
+                f"...Export still in progress, waiting for {STATUS_WAIT_TIME} seconds"
+            )
             sleep(STATUS_WAIT_TIME)
         print("Export task is finished")
 
@@ -108,7 +112,9 @@ class BackupService:
         export_file_name = f'export_{space_id}_{datetime.now().strftime("%Y%m%d")}.zip'
 
         file_token = self.notion_client.get_file_token()
-        self._download_file(export_link, self.output_dir_path / export_file_name, file_token)
+        self._download_file(
+            export_link, self.output_dir_path / export_file_name, file_token
+        )
 
 
 @click.command()
