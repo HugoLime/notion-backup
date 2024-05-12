@@ -37,6 +37,18 @@ class NotionClient:
         response.raise_for_status()
         return response.cookies["token_v2"]
 
+    def get_file_token(self):
+        token = self.configuration_service._get_string_key("token")
+        if not token:
+            raise Exception("Token is not set")
+        response = requests.request(
+            "GET",
+            f"https://www.notion.so/f/refresh",
+            cookies={"token_v2": token},
+        )
+        response.raise_for_status()
+        return response.cookies["file_token"]
+
     def _send_post_request(self, path, body):
         token = self.configuration_service._get_string_key("token")
         if not token:
