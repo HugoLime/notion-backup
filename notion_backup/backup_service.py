@@ -116,7 +116,7 @@ class BackupService:
 
         export_file_name = f'export_{space_id}_{datetime.now().strftime("%Y%m%d")}.zip'
 
-        file_token = self.notion_client.get_file_token()
+        file_token = self.configuration_service._get_string_key("file_token")
         self._download_file(
             export_link, self.output_dir_path / export_file_name, file_token
         )
