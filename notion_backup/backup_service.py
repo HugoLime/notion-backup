@@ -97,7 +97,12 @@ class BackupService:
         print(f"Export task {task_id} has been launched")
 
         while True:
-            task_status = self.notion_client.get_user_task_status(task_id)
+            try:
+                task_status = self.notion_client.get_user_task_status(task_id)
+            except requests.exceptions.HTTPError as err:
+                if err.response.status_code == 429:
+                    print(f"Too many requests when polling task status")
+                raise err
             if "status" in task_status and task_status["status"]["type"] == "complete":
                 break
             print(
