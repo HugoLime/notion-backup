@@ -14,7 +14,7 @@ class NotionClient:
             "POST",
             f"{NOTION_API_ROOT}/sendTemporaryPassword",
             json={
-                "email": self.configuration_service._get_string_key("email"),
+                "email": self.configuration_service.get_string_key("email"),
                 "disableLoginLink": False,
                 "native": False,
                 "isSignup": False,
@@ -38,7 +38,7 @@ class NotionClient:
         return response.cookies["token_v2"]
 
     def _send_post_request(self, path, body):
-        token = self.configuration_service._get_string_key("token")
+        token = self.configuration_service.get_string_key("token")
         if not token:
             raise Exception("Token is not set")
         response = requests.request(

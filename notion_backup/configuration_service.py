@@ -15,7 +15,7 @@ class ConfigurationService:
     def _get_key(self, key):
         return self.config.get(key)
 
-    def _get_string_key(self, key) -> Optional[str]:
+    def get_string_key(self, key) -> Optional[str]:
         value = self._get_key(key)
         if not isinstance(value, str):
             return None

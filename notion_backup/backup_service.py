@@ -28,7 +28,7 @@ class BackupService:
         self.notion_client = NotionClient(self.configuration_service)
 
     def _login(self):
-        email = self.configuration_service._get_string_key("email")
+        email = self.configuration_service.get_string_key("email")
         if email:
             email = prompt("Email address: ", default=email)
         else:
@@ -58,7 +58,7 @@ class BackupService:
                     export_file.write(data)
 
     def _ensure_credentials_available(self):
-        token = self.configuration_service.get_key("token")
+        token = self.configuration_service.get_string_key("token")
         if not token:
             print("First time login")
             self._login()
@@ -114,7 +114,7 @@ class BackupService:
             print(f"Selecting space {self.space_id}")
             space_id = self.space_id
         else:
-            space_id = self.configuration_service._get_string_key("space_id")
+            space_id = self.configuration_service.get_string_key("space_id")
             space_id = prompt("Select space id: ", default=(space_id or spaces[0][0]))
 
         if space_id not in map(itemgetter(0), spaces):
@@ -130,7 +130,7 @@ class BackupService:
 
         export_file_name = f'export_{space_id}_{datetime.now().strftime("%Y%m%d")}.zip'
 
-        file_token = self.configuration_service._get_string_key("file_token")
+        file_token = self.configuration_service.get_string_key("file_token")
         self._download_file(
             export_link, self.output_dir_path / export_file_name, file_token
         )
@@ -139,7 +139,7 @@ class BackupService:
         self._ensure_credentials_available()
         task_id = self.notion_client.launch_block_export_task(space_id, block_id, **export_options)
         export_link = self._wait_for_task(task_id)
-        file_token = self.notion_client.get_file_token()
+        file_token = self.configuration_service.get_string_key("file_token")
 
         export_file_name = (
             self.output_dir_path / f'export_{space_id}_{block_id}_{datetime.now().strftime("%Y%m%d")}.zip'
@@ -152,7 +152,7 @@ class BackupService:
         self._ensure_credentials_available()
         task_id = self.notion_client.launch_block_export_task(space_id, block_id)
         export_link = self._wait_for_task(task_id)
-        file_token = self.notion_client.get_file_token()
+        file_token = self.configuration_service.get_string_key("file_token")
 
         export_file_name = BytesIO()
         self._download_file(export_link, export_file_name, file_token)
