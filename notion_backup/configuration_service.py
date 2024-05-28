@@ -8,14 +8,14 @@ DEFAULT_CONFIG = {"version": 1}
 
 
 class ConfigurationService:
-    def __init__(self):
-        self.conf_file = Path.home() / CONFIGURATION_FILE_NAME
+    def __init__(self, config_path: Path = Path.home()):
+        self.conf_file = config_path / CONFIGURATION_FILE_NAME
         self._read_config()
 
     def _get_key(self, key):
         return self.config.get(key)
 
-    def _get_string_key(self, key) -> Optional[str]:
+    def get_string_key(self, key) -> Optional[str]:
         value = self._get_key(key)
         if not isinstance(value, str):
             return None

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "notion-backup"
-version = "0.3.6"
+version = "0.3.7"
 description = "Notion workspace export automation tool"
 authors = ["Ligohu <ligohu@outlook.fr>"]
 readme = "README.md"
@@ -20,7 +20,6 @@ black = ">=19.10b0"
 [tool.poetry.scripts]
 backup_notion = 'notion_backup.backup_service:main'
 
-
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
