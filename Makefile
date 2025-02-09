@@ -23,7 +23,7 @@ update: ## Update dependencies
 	@poetry update
 
 backup: ## Run backup
-	@poetry run backup_notion --output-dir='exports'
+	@poetry run backup_notion --output-dir='exports' --config-file='notion_backup.conf'
 
 build: ## Build package
 	@poetry build

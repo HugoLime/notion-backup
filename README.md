@@ -2,26 +2,19 @@
 
 Automate export of Notion workspace
 
-## Deprecation
-
-The login system does not work anymore. Its seems to be blocked by a browser integrity check
-
 ## Installation
 
 ```
 pip install --upgrade notion-backup
 ```
 
+## Configuration
+
+Create a `notion_backup.conf` file from the template `notion_backup.conf.template`.
+Get the token, file_token and space_id from the cookies of your browser.
+
 ## Usage
 
 ```
-backup_notion --output-dir='.'
+backup_notion --output-dir='.' --config-file='notion_backup.conf'
 ```
-
-## How it works
-
-The script obtains an API token by requesting a temporary password to be sent to your email address.
-
-Login information are stored in `~/.notion_backup.conf`
-
-The export zip is generated and downloaded to the specified directory.

@@ -9,38 +9,8 @@ class NotionClient:
     def __init__(self, configuration_service: ConfigurationService):
         self.configuration_service = configuration_service
 
-    def ask_otp(self):
-        response = requests.request(
-            "POST",
-            f"{NOTION_API_ROOT}/sendTemporaryPassword",
-            json={
-                "email": self.configuration_service._get_string_key("email"),
-                "disableLoginLink": False,
-                "native": False,
-                "isSignup": False,
-            },
-        )
-        response.raise_for_status()
-        json_response = response.json()
-        return {
-            "csrf_state": json_response["csrfState"],
-            "csrf_cookie": response.cookies["csrf"],
-        }
-
-    def get_token(self, csrf_values, otp):
-        response = requests.request(
-            "POST",
-            f"{NOTION_API_ROOT}/loginWithEmail",
-            json={"state": csrf_values["csrf_state"], "password": otp},
-            cookies={"csrf": csrf_values["csrf_cookie"]},
-        )
-        response.raise_for_status()
-        return response.cookies["token_v2"]
-
     def _send_post_request(self, path, body):
-        token = self.configuration_service._get_string_key("token")
-        if not token:
-            raise Exception("Token is not set")
+        token = self.configuration_service.get_string_key("token")
         response = requests.request(
             "POST",
             f"{NOTION_API_ROOT}/{path}",
@@ -54,7 +24,7 @@ class NotionClient:
         return self._send_post_request("loadUserContent", {})["recordMap"]
 
     def launch_export_task(self, space_id):
-        return self._send_post_request(
+        self._send_post_request(
             "enqueueTask",
             {
                 "task": {
@@ -65,13 +35,15 @@ class NotionClient:
                             "exportType": "markdown",
                             "timeZone": "Europe/Paris",
                             "locale": "en",
+                            "collectionViewExportType": "currentView",
                         },
+                        "shouldExportComments": False,
                     },
                 }
             },
-        )["taskId"]
+        )
 
-    def get_user_task_status(self, task_id):
+    def get_task_status(self, task_id):
         task_statuses = self._send_post_request("getTasks", {"taskIds": [task_id]})[
             "results"
         ]
@@ -79,3 +51,10 @@ class NotionClient:
         return list(
             filter(lambda task_status: task_status["id"] == task_id, task_statuses)
         )[0]
+
+    def get_user_tasks(self):
+        task_ids = self._send_post_request(
+            "getUserTasks",
+            {"spaceId": self.configuration_service.get_string_key("space_id")},
+        )["taskIds"]
+        return self._send_post_request("getTasks", {"taskIds": task_ids})["results"]
