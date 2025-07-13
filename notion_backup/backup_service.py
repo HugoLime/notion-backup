@@ -55,17 +55,17 @@ class BackupService:
         user_id = list(user_content["notion_user"].keys())[0]
         print(f"User id: {user_id}")
 
-        available_spaces = [
-            (space_id, space_details["value"]["name"])
-            for (space_id, space_details) in user_content["space"].items()
+        available_spaces_ids = [
+            space_view_pointer["spaceId"]
+            for space_view_pointer in user_content["user_root"][user_id]["value"][
+                "space_view_pointers"
+            ]
         ]
-        print("Available spaces:")
-        for available_space_id, available_space_name in available_spaces:
-            print(f"\t- {available_space_name}: {available_space_id}")
+        print(f"Available spaces ids: {available_spaces_ids}")
 
         selected_space_id = self.configuration_service.get_string_key("space_id")
         print(f"Selected space id: {selected_space_id}")
-        if selected_space_id not in map(itemgetter(0), available_spaces):
+        if selected_space_id not in available_spaces_ids:
             raise Exception("Selected space id not in list of available spaces")
 
         print("Checking if export task is already running")
@@ -109,7 +109,9 @@ class BackupService:
         export_link = task_status["status"]["exportURL"]
         print(f"Downloading zip export from {export_link}")
 
-        export_file_name = f'export_{selected_space_id}_{datetime.now().strftime("%Y%m%d")}.zip'
+        export_file_name = (
+            f'export_{selected_space_id}_{datetime.now().strftime("%Y%m%d")}.zip'
+        )
 
         file_token = self.configuration_service.get_string_key("file_token")
         self._download_file(
